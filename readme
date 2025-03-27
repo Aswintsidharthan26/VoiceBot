@@ -5,85 +5,98 @@ This is a VoiceBot powered by a Language Model (LLM) that can understand your vo
 ---
 
 ## 🧠 Features
-- 🎤 Voice Input (speech-to-text)
-- 💬 AI-Powered Responses (LLM)
-- 🗣️ Text-to-Speech replies
-- 🧠 Prompt-engineered with data about Aswin
-- 📱 Streamlit Web Interface for easy access
+
+- 🎤 Voice Input (Speech-to-Text)
+- 💬 AI-Powered Responses (LLM via OpenAI API or similar)
+- 🗣️ Bot Replies using Text-to-Speech (TTS)
+- 🧠 Prompt-engineered with custom data about Aswin
+- 🌐 Simple HTML/JS Frontend (No Streamlit)
+- 🔁 Full voice-to-voice interaction loop
 
 ---
 
-## 🚀 How to Use This (No Coding Knowledge Needed)
+## 🚀 How It Works
 
-### 🛠️ Step 1: Install Python
+1. **Frontend**: A basic HTML + JavaScript page is used to:
+   - Record audio via the browser
+   - Send it to the backend for speech-to-text (STT)
+   - Display and forward the transcription to the chatbot
+   - Convert the bot's response to speech (TTS) and play it back
 
-Download and install Python from [here](https://www.python.org/downloads/).  
-Make sure to check ✅ **Add Python to PATH** during installation.
+2. **Backend (FastAPI)**:
+   - `/stt/`: Accepts audio, converts to text using SpeechRecognition
+   - `/chat/`: Accepts text, returns LLM response
+   - `/tts/`: Accepts text, returns voice via `gTTS` and plays audio
 
 ---
 
-### 📁 Step 2: Clone the Project
+## 🛠️ Running Locally
 
-If you're using Git:
-```bash
-git clone https://github.com/Aswintsidharthan26/VoiceBot.git
-cd VoiceBot
-
-
-##Or simply Download ZIP from the GitHub repo and extract it.
-
-#📦 Step 3: Install the Required Packages
-#Open a terminal/command prompt inside the project folder and run:
-
-pip install -r requirements.txt
+1. **Clone the repo**:
+   ```bash
+   git clone https://github.com/your-username/voicebot.git
+   cd voicebot
 
 
-###This installs all necessary tools automatically.
+Install dependencies:
 
-#▶️ Step 4: Run the App
-#Once installed, just run the following command:
-
-streamlit run streamlit_app.py
-# Wait a few seconds and a browser window will open automatically with the VoiceBot interface.
-
-# 🔧 Troubleshooting
-# Microphone not working? Make sure your system allows browser/microphone access.
-
-# Audio errors? Check if your speaker and mic are set correctly on your device.
-
-# 🌐 Optional: Use with FastAPI Backend
-# This project also includes a backend using FastAPI.
-
-# To run the backend:
-
-cd app
-uvicorn main:app --reload
-# This is optional and used for handling speech/voice features separately if needed.
-
-# 📂 Project Structure
 bash
 Copy
 Edit
+pip install -r requirements.txt
+Run the FastAPI server:
+
+bash
+Copy
+Edit
+uvicorn main:app --reload
+Open the frontend:
+
+Open index.html from the static/ folder directly in your browser OR
+
+If served via FastAPI static mount, access it at: http://localhost:8000
+
+🌍 Deployed Version
+The app is deployed on Render:
+
+👉 https://voicebot-aswin.onrender.com
+
+Upload or record voice
+
+Get bot replies and hear the voice response
+
+🧪 Development Notes
+Make sure microphone access is enabled in the browser.
+
+Audio must be recorded in WAV format to be compatible with the backend STT.
+
+This version drops Streamlit and uses native JS + HTML for better control and compatibility with deployment platforms like Render.
+
+📁 Project Structure
+csharp
+Copy
+Edit
 voicebot/
-├── app/                    # FastAPI backend
-│   ├── main.py             # Backend logic
-├── streamlit_app.py        # Frontend Web App
-├── requirements.txt        # Python dependencies
-├── README.md               # You're here!
-└── .gitignore              # Ignore files like venv
-# 🧑‍💻 About
-# Made by Aswin – A custom-built AI assistant that knows me and how I think, speak, and respond. Designed for natural voice interaction powered by prompt engineering.
+├── main.py              # FastAPI backend
+├── static/
+│   └── index.html       # HTML/JS frontend
+├── templates/           # (optional Jinja2 support)
+├── requirements.txt
+├── README.md
+🤖 Powered By
+Groq LLM
 
-# 🐳 Docker (Optional)
-# If you want to use Docker:
+Python FastAPI
 
+gTTS for TTS
 
-docker build -t voicebot-app .
-docker run -p 8501:8501 voicebot-app
-# 📬 Feedback
-# If you're testing this for assessment or feedback, feel free to reach out or open an issue.
+SpeechRecognition
 
-# Happy chatting! 🧠🎧
----
+HTML5 Media Recorder API
 
-# Let me know if you want to customize any part (like adding screenshots or deployment instructions for
+🙌 Made with ❤️ by Aswin
+vbnet
+Copy
+Edit
+
+Let me know if you'd like to include example screenshots, GIFs, or a video demo section too!

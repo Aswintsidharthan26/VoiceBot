@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voice Chatbot</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+    #chat-box { background: white; padding: 15px; border: 1px solid #ccc; max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
+    .user { color: blue; margin-bottom: 5px; }
+    .bot { color: green; margin-bottom: 10px; }
+    #controls button { padding: 10px 20px; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h2>🎙📝 Voice Chatbot</h2>
+
+  <div id="chat-box"></div>
+
+  <div id="controls">
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop & Send</button>
+  </div>
+
+  <script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = event => {
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.start();
+      console.log("Recording started...");
+    }
+
+    async function stopRecording() {
+      mediaRecorder.stop();
+      console.log("Recording stopped...");
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append("file", audioBlob, "recording.wav");
+
+        // 1. Send to /stt/
+        const sttRes = await fetch("/stt/", {
+          method: "POST",
+          body: formData
+        });
+
+        const sttData = await sttRes.json();
+        const userText = sttData.text;
+        console.log("Transcribed:", userText);
+
+        appendMessage("user", userText);
+
+        // 2. Send to /chat/
+        const chatRes = await fetch("/chat/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userText })
+        });
+
+        const chatData = await chatRes.json();
+        const botResponse = chatData.response;
+        appendMessage("bot", botResponse);
+        sendToTTS(botResponse);
+
+
+        // 3. Send to /tts/
+        const ttsRes = await fetch("/tts/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: botResponse })
+        });
+
+        const ttsBlob = await ttsRes.blob();
+        const audioURL = URL.createObjectURL(ttsBlob);
+        const audio = new Audio(audioURL);
+        audio.play();
+      };
+    }
+
+    function appendMessage(role, text) {
+      const chatBox = document.getElementById("chat-box");
+      const message = document.createElement("div");
+      message.className = role;
+      message.textContent = `${role === "user" ? "🧑" : "🤖"}: ${text}`;
+      chatBox.appendChild(message);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+
+    async function sendToTTS(text) {
+  try {
+    const response = await fetch("/tts/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ text: text })
+    });
+
+    if (!response.ok) {
+      console.error("TTS request failed");
+      return;
+    }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    audio.play();
+  } catch (error) {
+    console.error("TTS error:", error);
+  }
+}
+
+
+  </script>
+</body>
+</html>

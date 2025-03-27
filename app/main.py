@@ -10,17 +10,34 @@ from gtts import gTTS
 import pygame
 import tempfile
 import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
 # CORS to allow frontend communication
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, set to your domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def serve_index():
+    return FileResponse("static/index.html")
 
 # Load API Keys from environment variables
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
@@ -69,57 +86,60 @@ async def chat(request: ChatRequest):
 
 
 # Speech-to-Text (STT) using Google Speech Recognition
+from pydub import AudioSegment
+
 @app.post("/stt/")
 async def speech_to_text(file: UploadFile = File(...)):
     try:
-        recognizer = sr.Recognizer()
-        print("FILE", file)
+        print("FILE***********************",file)
         # Save uploaded file temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_audio:
             temp_audio.write(await file.read())
             temp_audio_path = temp_audio.name
 
+        # Convert to WAV using pydub
+        audio = AudioSegment.from_file(temp_audio_path)
+        wav_path = temp_audio_path.replace(".webm", ".wav")
+        audio.export(wav_path, format="wav")
+
         # Convert speech to text
-        with sr.AudioFile(temp_audio_path) as source:
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(wav_path) as source:
             audio_data = recognizer.record(source)
-        # print("AUDIO DATA", audio_data)
         text = recognizer.recognize_google(audio_data)
-        # print("Transcription:", text)
-        # Clean up temporary file
+
+        # Clean up
         os.remove(temp_audio_path)
+        os.remove(wav_path)
 
-        return {"transcription": text}
+        return {"text": text}
+    except Exception as e:
+        return {"error": str(e)}
 
-    except sr.UnknownValueError:
-        return {"error": "Could not understand the audio"}
-    except sr.RequestError as e:
-        return {"error": f"Google Speech-to-Text API error: {e}"}
 
 
 
 class TTSRequest(BaseModel):
-    message: str
+    text: str
 
 # Text-to-Speech (TTS) using Google Text-to-Speech
+from fastapi import BackgroundTasks
+
 @app.post("/tts/")
-async def text_to_speech(req: TTSRequest):
+async def text_to_speech(req: TTSRequest, background_tasks: BackgroundTasks):
     try:
         output_file = "output.mp3"
-        text = req.message
+        text = req.text
+
         # Convert text to speech
         tts = gTTS(text=text, lang="en")
-        print("OUTPUT***********************",tts)
         tts.save(output_file)
 
-        # Play the audio using pygame
-        pygame.mixer.init()
-        pygame.mixer.music.load(output_file)
-        pygame.mixer.music.play()
+        # Delete file after response is sent (optional cleanup)
+        background_tasks.add_task(os.remove, output_file)
 
-        while pygame.mixer.music.get_busy():
-            continue  # Wait until audio finishes playing
-
-        return {"message": "Text converted to speech and played successfully!"}
+        # Send the audio file to the frontend
+        return FileResponse(output_file, media_type="audio/mpeg", filename="output.mp3")
 
     except Exception as e:
-        return {"error": f"Text-to-Speech conversion failed: {e}"}
+        return {"error": f"Text to speech conversion failed: {str(e)}"}
