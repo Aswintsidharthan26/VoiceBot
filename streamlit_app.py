@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-import sounddevice as sd
+# import sounddevice as sd
 import numpy as np
 import wave
 import time
@@ -22,27 +22,46 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # 🎤 **Voice Recording Function**
-def record_audio(filename="speech.wav", duration=5, samplerate=44100):
-    print("🎤 Recording... Speak now! and wait for 5 seconds...")
-    msg_placeholder = st.empty()  # Create a placeholder for the message
-    
-    # Show the recording message
-    msg_placeholder.write("🎤 Recording... Speak now! and wait for 5 seconds...")
-    recording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1, dtype=np.int16)
-    time.sleep(duration)
+st.subheader("Upload your voice (.wav file)")
+audio_file = st.file_uploader("Choose a WAV file", type=["wav"])
 
-    sd.wait()  # Wait until recording is finished
-    msg_placeholder.empty()
+if audio_file is not None:
+    files = {"file": audio_file}
+    st.write("⏳ Transcribing...")
+    response = requests.post(STT_URL, files=files)
+    if response.ok:
+        user_text = response.json()["text"]
+        st.success(f"Transcribed Text: {user_text}")
+    else:
+        st.error("Transcription failed. Please try again.")
+        user_text = ""
+else:
+    user_text = st.text_input("💬 Or type your message here:")
 
-    # Save the recording
-    with wave.open(filename, "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(samplerate)
-        wf.writeframes(recording.tobytes())
+# 🧠 CHAT & TTS Logic
+if st.button("Send") and user_text:
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": user_text})
+    with st.chat_message("user"):
+        st.markdown(user_text)
 
-    print("✅ Recording saved as", filename)
-    return filename
+    # Send to chat backend
+    with st.spinner("Thinking..."):
+        res = requests.post(CHAT_URL, json={"message": user_text})
+        bot_reply = res.json()["response"]
+
+    # Add bot response
+    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+    with st.chat_message("assistant"):
+        st.markdown(bot_reply)
+
+    # Text-to-Speech backend
+    tts_res = requests.post(TTS_URL, json={"text": bot_reply})
+    if tts_res.ok:
+        audio_data = tts_res.content
+        st.audio(audio_data, format="audio/wav")
+    else:
+        st.error("TTS failed.")
 
 # 🎤 **Voice Input**
 if st.button("🎙 Start Recording"):
