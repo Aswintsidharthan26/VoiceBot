@@ -34,32 +34,27 @@ This is a VoiceBot powered by a Language Model (LLM) that can understand your vo
 
 1. **Clone the repo**:
    ```bash
-   git clone https://github.com/your-username/voicebot.git
+   git clone https://github.com/Aswintsidharthan26/VoiceBot.git
    cd voicebot
 
 
 Install dependencies:
 
-bash
-Copy
-Edit
+
 pip install -r requirements.txt
 Run the FastAPI server:
 
-bash
-Copy
-Edit
+
 uvicorn main:app --reload
 Open the frontend:
 
-Open index.html from the static/ folder directly in your browser OR
 
-If served via FastAPI static mount, access it at: http://localhost:8000
+served via FastAPI static mount, access it at: http://localhost:8000
 
 🌍 Deployed Version
 The app is deployed on Render:
 
-👉 https://voicebot-aswin.onrender.com
+👉 https://voicebot-4.onrender.com
 
 Upload or record voice
 
@@ -73,14 +68,11 @@ Audio must be recorded in WAV format to be compatible with the backend STT.
 This version drops Streamlit and uses native JS + HTML for better control and compatibility with deployment platforms like Render.
 
 📁 Project Structure
-csharp
-Copy
-Edit
+
 voicebot/
 ├── main.py              # FastAPI backend
 ├── static/
 │   └── index.html       # HTML/JS frontend
-├── templates/           # (optional Jinja2 support)
 ├── requirements.txt
 ├── README.md
 🤖 Powered By
@@ -95,8 +87,6 @@ SpeechRecognition
 HTML5 Media Recorder API
 
 🙌 Made with ❤️ by Aswin
-vbnet
-Copy
-Edit
+
 
 Let me know if you'd like to include example screenshots, GIFs, or a video demo section too!
