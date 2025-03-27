@@ -10,13 +10,4 @@ services:
     plan: free
     region: oregon
 
-  - type: web
-    name: voicebot-frontend
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run streamlit_app.py --server.port 8501
-    envVars:
-      - key: PORT
-        value: 8501
-    plan: free
-    region: oregon
+
