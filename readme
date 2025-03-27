@@ -1,0 +1,89 @@
+# 🎙️ VoiceBot – Personal AI Assistant
+
+This is a VoiceBot powered by a Language Model (LLM) that can understand your voice, talk back to you, and is designed with data and prompts about me (Aswin). You can interact with it using your voice — like a real conversation!
+
+---
+
+## 🧠 Features
+- 🎤 Voice Input (speech-to-text)
+- 💬 AI-Powered Responses (LLM)
+- 🗣️ Text-to-Speech replies
+- 🧠 Prompt-engineered with data about Aswin
+- 📱 Streamlit Web Interface for easy access
+
+---
+
+## 🚀 How to Use This (No Coding Knowledge Needed)
+
+### 🛠️ Step 1: Install Python
+
+Download and install Python from [here](https://www.python.org/downloads/).  
+Make sure to check ✅ **Add Python to PATH** during installation.
+
+---
+
+### 📁 Step 2: Clone the Project
+
+If you're using Git:
+```bash
+git clone https://github.com/Aswintsidharthan26/VoiceBot.git
+cd VoiceBot
+
+
+##Or simply Download ZIP from the GitHub repo and extract it.
+
+#📦 Step 3: Install the Required Packages
+#Open a terminal/command prompt inside the project folder and run:
+
+pip install -r requirements.txt
+
+
+###This installs all necessary tools automatically.
+
+#▶️ Step 4: Run the App
+#Once installed, just run the following command:
+
+streamlit run streamlit_app.py
+# Wait a few seconds and a browser window will open automatically with the VoiceBot interface.
+
+# 🔧 Troubleshooting
+# Microphone not working? Make sure your system allows browser/microphone access.
+
+# Audio errors? Check if your speaker and mic are set correctly on your device.
+
+# 🌐 Optional: Use with FastAPI Backend
+# This project also includes a backend using FastAPI.
+
+# To run the backend:
+
+cd app
+uvicorn main:app --reload
+# This is optional and used for handling speech/voice features separately if needed.
+
+# 📂 Project Structure
+bash
+Copy
+Edit
+voicebot/
+├── app/                    # FastAPI backend
+│   ├── main.py             # Backend logic
+├── streamlit_app.py        # Frontend Web App
+├── requirements.txt        # Python dependencies
+├── README.md               # You're here!
+└── .gitignore              # Ignore files like venv
+# 🧑‍💻 About
+# Made by Aswin – A custom-built AI assistant that knows me and how I think, speak, and respond. Designed for natural voice interaction powered by prompt engineering.
+
+# 🐳 Docker (Optional)
+# If you want to use Docker:
+
+
+docker build -t voicebot-app .
+docker run -p 8501:8501 voicebot-app
+# 📬 Feedback
+# If you're testing this for assessment or feedback, feel free to reach out or open an issue.
+
+# Happy chatting! 🧠🎧
+---
+
+# Let me know if you want to customize any part (like adding screenshots or deployment instructions for
